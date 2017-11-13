@@ -71,3 +71,9 @@ class GridController( object ):
         self.grid = np.zeros( [ 10, 20 ], dtype=np.uint8 )
         if self.realAction:
             self.score.reset( )
+            self.lastRowsCleared = 0
+            self.lastMaxHeight = 0
+            self.lastSumHeight = 0
+            self.lastRelativeHeight = 0
+            self.lastRoughness = 0
+            self.lastAmountHoles = 0

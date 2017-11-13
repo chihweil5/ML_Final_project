@@ -51,7 +51,7 @@ class AI( object ):
                 state_count += 1
                 pass
             state += [20 - state_count]
-
+        """
         state_diff=[]
         for i in range(len(state)-1):
             if state[i+1] > state[i]:
@@ -60,7 +60,10 @@ class AI( object ):
                 state_diff.append(-1)
             else:
                 state_diff.append(0)
-
+        """
+        state_diff=[]
+        for i in range(len(state)-1):
+            state_diff.append(state[i+1] - state[i])
         # print(state)
         # input()
 
@@ -77,13 +80,13 @@ class AI( object ):
         # input()
         # print(self.state)
         # =====================================================================
-
+        initH = self.grid.lastMaxHeight
         bestRating = -10000000000000
         bestMove = 0
         bestRotate = 0
 
         for move in range( -5, 6 ):
-            for rotate in range( 0, 4 ):
+            for rotate in range( 0, 3 ):
                 for i in range( 0, rotate ):
                     tile.rotCW( )
                 if move<0:
@@ -93,7 +96,7 @@ class AI( object ):
                     for i in range( 0, move ):
                         tile.incX( )
 
-                initH = self.grid.lastMaxHeight
+                
                 tile.drop( )
                 tile.apply( )
                 self.grid.removeCompleteRows( )
@@ -139,7 +142,7 @@ class AI( object ):
                         pass
                     state += [20 - state_count]
                 #nextState = state + [tile.identifier]
-
+                """
                 state_diff=[]
                 for i in range(len(state)-1):
                     if state[i+1] > state[i]:
@@ -148,8 +151,12 @@ class AI( object ):
                         state_diff.append(-1)
                     else:
                         state_diff.append(0)
+                """
+                state_diff=[]
+                for i in range(len(state)-1):
+                    state_diff.append(state[i+1] - state[i])
                 nextState = state_diff + [tile.identifier]
-
+                
                 if key not in self.exp:
                     Q = alpha * reward
                     self.exp[key] = (reward, nextState, Q)
@@ -159,6 +166,12 @@ class AI( object ):
                     Q += alpha * (reward + gamma * self.getMaxQ(nextState, alpha, reward)[0] - Q)
                     self.exp[key] = (reward, nextState, Q)
                     print("old %f, %f, %f" % (Q, move, rotate))
+
+                print(self.state)
+                print(state_diff)
+                print(reward)
+                print(Q)
+                input()
                 # print(move, rotate, Q)
                 # input()
                 # print(Q)
@@ -274,8 +287,8 @@ class AI( object ):
         if self.grid.checkForGameOver( ):
             gameover = True
         reward = 0
-
-        reward += -100 * (h2-h1)
+        print('new H: %d, cur H: %d' % (h2, h1))
+        reward += (-100) * (h2-h1)
         # reward += self.grid.lastRowsCleared * 4.760666
         # reward += self.grid.lastMaxHeight * -1.510066
         # reward += self.grid.lastSumHeight * 0.0
@@ -283,7 +296,7 @@ class AI( object ):
         # # reward += self.grid.lastAmountHoles * -0.35663
         # reward += self.grid.lastAmountHoles * -5.35663
         # reward += self.grid.lastRoughness * -0.184483
-        # reward += self.grid.lastRowsCleared * -10
+        reward += self.grid.lastRowsCleared * 500
         # reward += self.grid.lastMaxHeight * -5
         # reward += self.grid.lastSumHeight * -1
         # reward += self.grid.lastRelativeHeight * -1
