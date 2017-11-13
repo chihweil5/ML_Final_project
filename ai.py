@@ -42,8 +42,24 @@ class AI( object ):
             else:
                 break
 
-        self.state = np.copy( self.grid.grid.transpose()[count:count+self.height] )
-        self.state[self.state > 0] = 1
+        state = []
+        for item in self.grid.grid:
+            # print(item)
+            # input()
+            state_count = 0
+            while state_count < 20 and item[state_count] == 0:
+                state_count += 1
+                pass
+            state += [20 - state_count]
+        # print(state)
+        # input()
+
+
+        # self.state = np.copy( self.grid.grid.transpose()[count:count+self.height] )
+        # self.state[self.state > 0] = 1
+       
+        self.state = state
+
         # for i in range(len(self.state)):
         #     print(self.state[i])
             # if self.state[i] > 0:
@@ -58,7 +74,7 @@ class AI( object ):
         bestRotate = 0
 
         for move in range( -5, 6 ):
-            for rotate in range( 0, 3 ):
+            for rotate in range( 0, 4 ):
                 for i in range( 0, rotate ):
                     tile.rotCW( )
                 if move<0:
@@ -90,21 +106,34 @@ class AI( object ):
                 reward, gameover = self.getReward()
                 # a = tuple(1,2,3)
                 # print(a)
-
-                key = tuple(self.state.flatten().tolist()+[move, rotate])
+                # print(tile.identifier)
+                # input()
+                # key = tuple(self.state.flatten().tolist()+[tile.identifier, move, rotate])
+                key = tuple(self.state+[tile.identifier, move, rotate])
                 # print(key)
                 # input()
-                nextState = np.copy( self.grid.grid.transpose()[count:count+self.height])
-                nextState[nextState > 0] = 1
-                nextState = nextState.flatten().tolist()
+                
+                # nextState = np.copy( self.grid.grid.transpose()[count:count+self.height])
+                # nextState[nextState > 0] = 1
+
+                state = []
+                for item in self.grid.grid:
+                    # print(item)
+                    # input()
+                    state_count = 0
+                    while state_count < 20 and item[state_count] == 0:
+                        state_count += 1
+                        pass
+                    state += [20 - state_count]
+                nextState = state + [tile.identifier]
 
                 if key not in self.exp:
                     Q = alpha * reward
                     self.exp[key] = (reward, nextState, Q)
-                    print("new %f, %f, %f" % (Q, move, rotate))
-                else:
+                    # print("new %f, %f, %f" % (Q, move, rotate))
+                elif key in self.exp:
                     Q = self.exp[key][2]
-                    Q += alpha * (reward + gamma * self.getMaxQ(nextState)[0] - Q)
+                    Q += alpha * (reward + gamma * self.getMaxQ(nextState, alpha, reward)[0] - Q)
                     self.exp[key] = (reward, nextState, Q)
                     print("old %f, %f, %f" % (Q, move, rotate))
                 # print(move, rotate, Q)
@@ -119,15 +148,17 @@ class AI( object ):
                 tile.psX, tile.psY, tile.rot = self.backupTile
                 self.grid.grid = np.copy( self.backupGrid )
         # =====================================================================
-        print(self.state.flatten().tolist())
-        Q = self.getMaxQ(self.state.flatten().tolist())[0]
-        print(Q)
-        bestAction = self.getMaxQ(self.state.flatten().tolist())[1]
-
+        # print(self.state.flatten().tolist())
+        # Q = self.getMaxQ(self.state.flatten().tolist(), alpha, reward)[0]
+        # print(Q)
+        # bestAction = self.getMaxQ(self.state.flatten().tolist(), alpha, reward)[1]
+        bestAction = self.getMaxQ(self.state, alpha, reward)[1]
+        # print(bestAction)
+        # input()
         # print(self.getMaxQ(self.state.flatten().tolist()))
         # input()
         bestMove, bestRotate = bestAction[0], bestAction[1]
-        print(bestAction)
+        # print(bestAction)
         # input()
         # =====================================================================
         
@@ -175,8 +206,8 @@ class AI( object ):
         return rating, gameover
 
     # =====================================================================
-    def getMaxQ( self , nextState):
-        maxQ = -100000
+    def getMaxQ( self , nextState, alpha, reward):
+        maxQ = -1000000
         best_set = []
         bestAction=()
         for k in self.exp:
@@ -194,8 +225,17 @@ class AI( object ):
                 if self.exp[k][2] > maxQ:
                     maxQ = self.exp[k][2]
                     best_set = [k[-2:]]
+                    # bestAction = k[-2:]
+                    # print("> %f" % maxQ)
                 elif self.exp[k][2] == maxQ:
                     best_set += [k[-2:]]
+                    # print("== %f" % maxQ)
+            else:
+                maxQ = alpha * reward
+                bestAction = (np.random.random_integers( -5, 5 ), np.random.random_integers( 0, 2 ))
+                # R = self.getReward
+                # self.exp[tuple(nextState +[bestAction[0], bestAction[1]])] = (reward, )
+                    # print("< %f" % maxQ)
         # print(self.exp[k][2], maxQ)
         # input()
         if len(best_set) > 1:
@@ -209,10 +249,16 @@ class AI( object ):
         if self.grid.checkForGameOver( ):
             gameover = True
         reward = 0
+
+        # reward += self.grid.lastRowsCleared * 4.760666
+        # reward += self.grid.lastMaxHeight * -1.510066
+        # reward += self.grid.lastSumHeight * 0.0
+        # reward += self.grid.lastRelativeHeight * -1.0
+        # # reward += self.grid.lastAmountHoles * -0.35663
+        # reward += self.grid.lastAmountHoles * -5.35663
+        # reward += self.grid.lastRoughness * -0.184483
         # reward += self.grid.lastRowsCleared * -10
-        # if self.grid.lastMaxHeight > 10:
-        reward += self.grid.lastMaxHeight * -5
-        # reward += self.grid.lastMaxHeight * -1
+        # reward += self.grid.lastMaxHeight * -5
         # reward += self.grid.lastSumHeight * -1
         # reward += self.grid.lastRelativeHeight * -1
         # reward += self.grid.lastAmountHoles * -1
