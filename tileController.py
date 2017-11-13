@@ -129,3 +129,10 @@ class TileController( object ):
     def getRandomTile( self ):
         pattern = self.tileSet[ np.random.random_integers( 0, 6 ) ]
         return MovableTile( pattern.layout, pattern.identifier, self.grid, 3 )
+
+    # =====================================================================    
+    def getTile( self , index):
+        index = ((index + 3) * 1234456) % 7 
+        pattern = self.tileSet[ 1 ]
+        return MovableTile( pattern.layout, pattern.identifier, self.grid, 3 )
+    # =====================================================================

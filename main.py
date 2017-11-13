@@ -20,13 +20,21 @@ tileController = tileController.TileController( gridController )
 
 grapher = grapher.Grapher( scoreController )
 
-ai = ai.AI( gridController, scoreController, grapher, {})
+ai = ai.AI( gridController, scoreController, grapher, {}, 20)
 
 viewController = viewController.ViewController( gridController, timeController, scoreController, ai, grapher )
 
+index = 0
 
-cTile = tileController.getRandomTile( )
-nTile = tileController.getRandomTile( )
+# =====================================================================
+cTile = tileController.getTile( index )
+index += 1
+nTile = tileController.getTile( index )
+# =====================================================================
+
+
+# cTile = tileController.getRandomTile( )
+# nTile = tileController.getRandomTile( )
 viewController.setTile( cTile, nTile )
 
 
@@ -36,9 +44,17 @@ while not viewController.abort:
             move, rotate, rating =  ai.makeMove( cTile )
         if not cTile.incY( ):
             cTile.apply( )
+
             if not gridController.checkForGameOver( ):
                 scoreController.tileReleased( )
-            cTile = nTile
-            nTile = tileController.getRandomTile( )
-            viewController.setTile( cTile, nTile )
+                cTile = nTile
+                index += 1
+                nTile = tileController.getTile( index )
+                viewController.setTile( cTile, nTile )
+            else:
+                index = 0
+                cTile = tileController.getTile( index )
+                index += 1
+                nTile = tileController.getTile( index )
+                viewController.setTile( cTile, nTile )
     viewController.updateEverything( )

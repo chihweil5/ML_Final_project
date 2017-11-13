@@ -34,7 +34,7 @@ class ViewController( object ):
         self.update = True
         self.infoMode = 0
         self.genomeScreen = [ 0, -1 ]
-        self.aiState = False
+        self.aiState = True
         #gui.init( )
         self.screen = gui.display.set_mode( ( 820,720 ) )
         self.fontBold = gui.font.Font( 'font/texgyrecursor-bold.otf', 60 )

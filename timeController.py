@@ -10,7 +10,7 @@ class TimeController( object ):
         self.eventInterval = interval
         self.lastTimedEvent = time.time( )
         self.speedMode = 3
-        self.speedSet = [ 0.125, 0.25, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 1000000]
+        self.speedSet = [ 0.125, 0.25, 0.5, 1000, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 1000000]
 
 
     def getIntvProgress( self ):
