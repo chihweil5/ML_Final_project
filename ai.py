@@ -313,7 +313,13 @@ class AI( object ):
 
         state_diff=[]
         for i in range(len(state)-1):
-            state_diff.append(state[i+1] - state[i])
+            # state_diff.append(state[i+1] - state[i])
+            if state[i+1] - state[i] > 0:
+                state_diff.append(1)
+            elif state[i+1] - state[i] < 0:
+                state_diff.append(-1)
+            else:
+                state_diff.append(0)
 
         return state_diff
 
