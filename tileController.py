@@ -134,10 +134,12 @@ class TileController( object ):
     # =====================================================================    
     def getTile( self , index):
         index = ((index + 3) * 1234451) % 7
-        if index > 3:
-            index = 0
-        else:
-            index = 6
+        # if index > 5:
+        #     index = 4
+        # elif index > 2:
+        #     index = 2
+        # else:
+        #     index = 1
         pattern = self.tileSet[ index ]
         return MovableTile( pattern.layout, pattern.identifier, self.grid, 3 )
     # =====================================================================

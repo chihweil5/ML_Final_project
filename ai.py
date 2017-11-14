@@ -192,6 +192,7 @@ class AI( object ):
         self.grid.realAction = True
         self.grid.grid = np.copy( self.backupGrid )
         initH = self.grid.lastMaxHeight
+        value1 = self.fitness()
         
         self.state = self.calculateState()
         curStateWithTile = tuple(self.state + [tile.identifier])
@@ -210,13 +211,14 @@ class AI( object ):
         self.grid.removeCompleteRows( )
 
         newH = self.grid.lastMaxHeight
+        value2 = self.fitness()
         nextState = self.calculateState()
         nextStateWithTile = tuple(nextState + [tile.identifier])
         # nextStateKey = tuple(nextStateWithTile + [bestMove, bestRotate])
         # print(curStateKey)
         # print(nextStateKey)
         # input()
-        reward = self.getReward(initH, newH)
+        reward = self.getReward(value1, value2)
         ####UPDATE Q!!!!
         if curStateWithTile not in self.exp:
             self.exp[curStateWithTile] = 0
@@ -226,6 +228,9 @@ class AI( object ):
         # print(curStateWithTile)
         # # print(self.exp[curStateKey])
         # input()
+        self.grid.grid = np.copy( self.backupGrid )
+        tile.drop()
+
     
     def chooseBestAction(self, tile):
         self.backupGrid = np.copy( self.grid.grid )
@@ -235,6 +240,7 @@ class AI( object ):
 
         old = False
         initH = self.grid.lastMaxHeight
+        value1 = self.fitness()
         maxQ = float('-inf')
         bestAction = []
         for move in range( -5, 6 ):
@@ -253,7 +259,8 @@ class AI( object ):
                 self.grid.removeCompleteRows( )
 
                 newH = self.grid.lastMaxHeight
-                reward = self.getReward(initH, newH)
+                value2 = self.fitness()
+                reward = self.getReward(value1, value2)
 
                 nextState = self.calculateState()
                 nextStateWithTile = tuple(nextState + [tile.identifier])
@@ -295,10 +302,25 @@ class AI( object ):
             print("old %f, %f, %f, %f" % (maxQ, newQ, oneBestAction[0], oneBestAction[1]))
         return oneBestAction[0], oneBestAction[1]
 
-    def getReward(self, h1, h2):
+    def getReward(self, value1, value2):
         #print('next H: %d, cur H: %d' % (h2, h1))
-        reward = (-100) * (h2-h1)
-        return reward
+        #reward = (-100) * (h2-h1)
+        """
+        reward = self.grid.lastRowsCleared * 4.7
+        reward += self.grid.lastMaxHeight * -1.51
+        #reward += self.grid.lastSumHeight * 0.0
+        #reward += self.grid.lastRelativeHeight * -1.0
+        reward += self.grid.lastAmountHoles * -5.35
+        reward += self.grid.lastRoughness * -0.184483
+        """
+        return value2-value1
+
+    def fitness(self):
+        value = self.grid.lastRowsCleared * 0.76
+        value += self.grid.lastSumHeight / 10 * -0.51
+        value += self.grid.lastAmountHoles * -0.36
+        value += self.grid.lastRoughness * -0.18
+        return value
 
     def calculateState(self):
         count = 0
