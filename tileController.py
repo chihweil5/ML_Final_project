@@ -3,6 +3,7 @@
 
 import numpy as np
 import gridController
+from random import choice
 
 
 class Tile( object ):
@@ -132,7 +133,11 @@ class TileController( object ):
 
     # =====================================================================    
     def getTile( self , index):
-        index = ((index + 3) * 1234456) % 7 
+        index = ((index + 3) * 1234451) % 7
+        if index > 3:
+            index = 0
+        else:
+            index = 6
         pattern = self.tileSet[ index ]
         return MovableTile( pattern.layout, pattern.identifier, self.grid, 3 )
     # =====================================================================

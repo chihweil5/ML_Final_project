@@ -194,8 +194,8 @@ class AI( object ):
         initH = self.grid.lastMaxHeight
         
         self.state = self.calculateState()
-        curStateWithTile = self.state + [tile.identifier]
-        curStateKey = tuple(curStateWithTile + [bestMove, bestRotate])
+        curStateWithTile = tuple(self.state + [tile.identifier])
+        # curStateKey = tuple(curStateWithTile + [bestMove, bestRotate])
 
         for i in range( 0, bestRotate ):
             tile.rotCW( )
@@ -211,19 +211,21 @@ class AI( object ):
 
         newH = self.grid.lastMaxHeight
         nextState = self.calculateState()
-        nextStateWithTile = nextState + [tile.identifier]
-        nextStateKey = tuple(nextStateWithTile + [bestMove, bestRotate])
+        nextStateWithTile = tuple(nextState + [tile.identifier])
+        # nextStateKey = tuple(nextStateWithTile + [bestMove, bestRotate])
         # print(curStateKey)
         # print(nextStateKey)
         # input()
         reward = self.getReward(initH, newH)
         ####UPDATE Q!!!!
-        if curStateKey not in self.exp:
-            self.exp[curStateKey] = 0
+        if curStateWithTile not in self.exp:
+            self.exp[curStateWithTile] = 0
         
-        self.exp[curStateKey] = (1 - self.alpha) * self.exp[curStateKey] + self.alpha * (reward + self.gamma * self.exp[nextStateKey])
-        # print(curStateKey)
-        # print(self.exp[curStateKey])
+        self.exp[curStateWithTile] = (1 - self.alpha) * self.exp[curStateWithTile] + self.alpha * (reward + self.gamma * self.exp[nextStateWithTile])
+        # print(self.grid.grid.transpose())
+        # print(curStateWithTile)
+        # # print(self.exp[curStateKey])
+        # input()
     
     def chooseBestAction(self, tile):
         self.backupGrid = np.copy( self.grid.grid )
@@ -234,6 +236,7 @@ class AI( object ):
         old = False
         initH = self.grid.lastMaxHeight
         maxQ = float('-inf')
+        bestAction = []
         for move in range( -5, 6 ):
             for rotate in range( 0, 3 ):
                 for i in range( 0, rotate ):
@@ -253,22 +256,22 @@ class AI( object ):
                 reward = self.getReward(initH, newH)
 
                 nextState = self.calculateState()
-                nextStateWithTile = nextState + [tile.identifier]
-                nextStateKey = tuple(nextStateWithTile + [move, rotate])
+                nextStateWithTile = tuple(nextState + [tile.identifier])
+                # nextStateKey = tuple(nextStateWithTile + [move, rotate])
                 
-                if nextStateKey not in self.exp:
+                if nextStateWithTile not in self.exp:
                     old = False
-                    self.exp[nextStateKey] = 0
-                elif self.exp[nextStateKey] != 0:                    
+                    self.exp[nextStateWithTile] = 0
+                elif self.exp[nextStateWithTile] != 0:                    
                     old = True
                     
-                Q = self.exp[nextStateKey]
-                if (reward + self.gamma * Q) >= maxQ:
-                    newQ = self.exp[nextStateKey]
+                Q = self.exp[nextStateWithTile]
+                if (reward + self.gamma * Q) > maxQ:
+                    newQ = self.exp[nextStateWithTile]
                     maxQ = reward + self.gamma * Q
-                    bestMove = move
-                    bestRotate = rotate
-
+                    bestAction = [[move, rotate]]
+                elif (reward + self.gamma * Q) == maxQ:
+                    bestAction.append([move, rotate])
                 # print('next H: %d, cur H: %d' % (newH, initH))
                 # print(self.state)
                 # print(nextState)
@@ -277,13 +280,20 @@ class AI( object ):
 
                 tile.psX, tile.psY, tile.rot = self.backupTile
                 self.grid.grid = np.copy( self.backupGrid )
-        if old:
-            print("old %f, %f, %f, %f" % (maxQ, newQ, bestMove, bestMove))
+        
             # input()
         # print('bestAction: (%d, %d)' % (bestMove, bestRotate))
         # print('Max Q:', maxQ)
         #input()
-        return bestMove, bestRotate
+        if len(bestAction) > 1:
+            oneBestAction = choice(bestAction)
+
+        else:
+            oneBestAction = bestAction[0]
+            
+        if old:
+            print("old %f, %f, %f, %f" % (maxQ, newQ, oneBestAction[0], oneBestAction[1]))
+        return oneBestAction[0], oneBestAction[1]
 
     def getReward(self, h1, h2):
         #print('next H: %d, cur H: %d' % (h2, h1))
