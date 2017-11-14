@@ -41,7 +41,8 @@ viewController.setTile( cTile, nTile )
 while not viewController.abort:
     if timeController.timeEvent( ):
         if viewController.aiState:
-            move, rotate, rating =  ai.makeMove( cTile )
+            #move, rotate, rating =  ai.makeMove( cTile )
+            ai.train(cTile)
         if not cTile.incY( ):
             cTile.apply( )
 
