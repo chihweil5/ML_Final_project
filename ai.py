@@ -24,6 +24,8 @@ class AI( object ):
             self.exp = exp
         else:
             self.exp = {}    
+        self.storeExp = {}
+        self.count = 0
         self.gamma = 0.8
         self.alpha = 0.2
         # =====================================================================
@@ -185,8 +187,12 @@ class AI( object ):
     # =====================================================================
 
     def train(self, tile):
+        if self.count > 100:
+            self.count = 0
+            self.exp = self.storeExp
         bestMove, bestRotate = self.chooseBestAction(tile)
         self.update(tile, bestMove, bestRotate)
+        self.count += 1
 
     def update(self, tile, bestMove, bestRotate):
         self.grid.realAction = True
@@ -221,7 +227,7 @@ class AI( object ):
         if curStateWithTile not in self.exp:
             self.exp[curStateWithTile] = 0
         
-        self.exp[curStateWithTile] = (1 - self.alpha) * self.exp[curStateWithTile] + self.alpha * (reward + self.gamma * self.exp[nextStateWithTile])
+        self.storeExp[curStateWithTile] = (1 - self.alpha) * self.exp[curStateWithTile] + self.alpha * (reward + self.gamma * self.exp[nextStateWithTile])
         # print(self.grid.grid.transpose())
         # print(curStateWithTile)
         # # print(self.exp[curStateKey])
@@ -290,14 +296,22 @@ class AI( object ):
 
         else:
             oneBestAction = bestAction[0]
-            
+
         if old:
             print("old %f, %f, %f, %f" % (maxQ, newQ, oneBestAction[0], oneBestAction[1]))
         return oneBestAction[0], oneBestAction[1]
 
     def getReward(self, h1, h2):
         #print('next H: %d, cur H: %d' % (h2, h1))
-        reward = (-100) * (h2-h1)
+        reward = 0
+        reward += self.grid.lastRowsCleared * 4.760666
+        reward += self.grid.lastMaxHeight * -1.510066
+        reward += self.grid.lastSumHeight * 0.0
+        reward += self.grid.lastRelativeHeight * -1.0
+        reward += self.grid.lastAmountHoles * -0.35663
+        reward += self.grid.lastAmountHoles * -5.35663
+        reward += self.grid.lastRoughness * -0.184483
+        # reward = (-100) * (h2-h1)
         return reward
 
     def calculateState(self):
