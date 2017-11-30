@@ -13,7 +13,6 @@ class Tile( object ):
 
 
 class MovableTile( Tile ):
-
     def __init__( self, layout, identifier, grid, posX, rot=-1):
         Tile.__init__( self, layout, identifier )
         self.grid = grid
@@ -91,11 +90,11 @@ class MovableTile( Tile ):
         return True
 
     def render( self ):
-        grid = np.zeros( [ 10, 20 ], dtype=np.uint8 )
+        grid = np.zeros( [ 6, 20 ], dtype=np.uint8 )
         rotated = np.rot90( self.layout, self.rot)
         for x in range(4):
             for y in range(4):
-                if -1 < x+self.psX < 10 and -1 < y+self.psY < 20:
+                if -1 < x+self.psX < 6 and -1 < y+self.psY < 20:
                     grid[ x+self.psX, y+self.psY ] = rotated[ x, y ] * self.identifier
         return grid
 
@@ -105,7 +104,7 @@ class MovableTile( Tile ):
 
     def apply( self ):
         rendered = self.render( )
-        for x in range( 10 ):
+        for x in range( 6 ):
             for y in range( 20 ):
                 if rendered[ x, y ] != 0:
                     self.grid.apply( x, y, self.identifier )

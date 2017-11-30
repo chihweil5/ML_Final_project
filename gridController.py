@@ -8,8 +8,10 @@ import math
 class GridController( object ):
 
     def __init__( self, score ):
+        self.width = 6
+        self.height = 20
         self.score = score
-        self.grid = np.zeros( [ 10, 20 ], dtype=np.uint8 )
+        self.grid = np.zeros( [ self.width, 20 ], dtype=np.uint8 )
         self.realAction = True
         self.lastRowsCleared = 0
         self.lastMaxHeight = 0
@@ -20,7 +22,7 @@ class GridController( object ):
 
 
     def checkField( self, psX, psY ):
-        if psX < 0 or psX > 9 or psY > 19 or psY < 0:
+        if psX < 0 or psX > self.width-1 or psY > 19 or psY < 0:
             return False
         if self.grid[ psX, psY ] != 0:
             return False
@@ -35,7 +37,7 @@ class GridController( object ):
             while np.amin( self.grid.T[ y ] ) != 0:
                 rows += 1
                 for y2 in range( y, 0, -1 ):
-                    for x in range( 10 ):
+                    for x in range( self.width ):
                         self.grid[ x, y2 ] = self.grid[ x, y2-1 ]
         self.lastRowsCleared = rows
         heightData = [ ]
@@ -49,10 +51,10 @@ class GridController( object ):
         self.lastSumHeight = np.sum( heightData )
         self.lastRelativeHeight = self.lastMaxHeight - np.amin( heightData )
         self.lastRoughness = 0
-        for x in range( 9 ):
+        for x in range( self.width-1 ):
             self.lastRoughness += abs( heightData[ x ] - heightData[ x-1 ] )
         self.lastAmountHoles = 0
-        for x in range( 10 ):
+        for x in range( self.width ):
             for y in range( 19, 1, -1 ):
                 if self.grid[ x, y ] == 0 and self.grid[ x, y-1 ] != 0:
                     self.lastAmountHoles += 1
@@ -68,7 +70,7 @@ class GridController( object ):
         return False
 
     def reset( self ):
-        self.grid = np.zeros( [ 10, 20 ], dtype=np.uint8 )
+        self.grid = np.zeros( [ self.width, 20 ], dtype=np.uint8 )
         if self.realAction:
             self.score.reset( )
             self.lastRowsCleared = 0

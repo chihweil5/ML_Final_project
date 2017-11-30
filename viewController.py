@@ -90,7 +90,7 @@ class ViewController( object ):
 
     def updateGrid( self ):
         grid = self.grid.grid  + self.cTile.render( )
-        for x in range( 10 ):
+        for x in range( 6 ):
             for y in range( 20 ):
                 color = self.colors[ grid[ x, y ] ]
                 gui.draw.rect( self.screen, color, gui.Rect( 30*x+65, 30*y+65, 21, 21 ), 0 )

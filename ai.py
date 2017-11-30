@@ -16,172 +16,19 @@ class AI( object ):
         self.currentGeneration = 0
         self.currentGenome = 0
         self.grapher = grapher
-        self.backupGrid = np.zeros( [ 10, 20 ], dtype=np.uint8 )
+        self.backupGrid = np.zeros( [ 6, 20 ], dtype=np.uint8 )
         self.backupTile = [ 0, 0, 0 ]
         # ===================================================================== 
-        self.state = np.zeros( [ self.height, 10 ], dtype=np.uint8 )
+        # self.state = np.zeros( [ self.height, 10 ], dtype=np.uint8 )
+        self.state = np.zeros( [ self.grid.width], dtype=np.uint8 )
         if exp != {}:
             self.exp = exp
         else:
             self.exp = {}    
-        self.gamma = 0.8
-        self.alpha = 0.2
+        self.gamma = 0.9
+        self.alpha = 0.02
         # =====================================================================
 
-    """
-    def update(self, tile, bestMove, bestRotate , gameover):
-        self.grid.realAction = True
-        self.grid.grid = np.copy( self.backupGrid )
-
-        if gameover:
-            self.population.generations[ self.currentGeneration ].genomes[ self.currentGenome ].score = self.score.getScore( )
-            if self.currentGenome == 39:
-                self.grapher.appendDataSet( [ x.score for x in self.population.generations[ self.currentGeneration ].genomes ] )
-                self.currentGenome = 0
-                self.population.nextGen( )
-                self.currentGeneration += 1
-            else:
-                self.currentGenome += 1
-
-        for i in range( 0, bestRotate ):
-            tile.rotCW( )
-        if bestMove<0:
-            for i in range( 0, -bestMove ):
-                tile.decX( )
-        if bestMove>0:
-            for i in range( 0, bestMove ):
-                tile.incX( )
-        tile.drop( )
-
-
-    def makeMove( self, tile ):
-        self.backupGrid = np.copy( self.grid.grid )
-        self.grid.realAction = False
-        self.backupTile = [ tile.psX, tile.psY, tile.rot ]
-
-        # =====================================================================
-        count = 0
-        test = [1,1,1,1,1,1,1,1,1,1]
-        for i in self.backupGrid.transpose():
-            if count > 15:
-                break
-            elif i.T.dot(test) == 0:
-                count += 1
-            else:
-                break
-
-        # self.state = np.copy( self.grid.grid.transpose()[count:count+self.height] )
-        # self.state[self.state > 0] = 1
-       
-        self.state = self.calculateState()
-        curStateWithTile = self.state + [tile.identifier]
-        # =====================================================================
-        initH = self.grid.lastMaxHeight
-        bestRating = -10000000000000
-        bestMove = 0
-        bestRotate = 0
-
-        for move in range( -5, 6 ):
-            for rotate in range( 0, 3 ):
-                for i in range( 0, rotate ):
-                    tile.rotCW( )
-                if move<0:
-                    for i in range( 0, -move ):
-                        tile.decX( )
-                if move>0:
-                    for i in range( 0, move ):
-                        tile.incX( )
-
-                tile.drop( )
-                tile.apply( )
-                self.grid.removeCompleteRows( )
-                newH = self.grid.lastMaxHeight
-
-                # if self.rateMove( )[ 0 ] > bestRating:
-                #     bestMove = move
-                #     bestRotate = rotate
-                #     bestRating, gameover = self.rateMove( )
-
-                # =====================================================================
-                count = 0
-                for i in self.grid.grid.transpose():
-                    if count > 15:
-                        break
-                    elif i.T.dot(test) == 0:
-                        count += 1
-                    else:
-                        break
-                alpha = 0.2
-                gamma = 0.9
-                reward, gameover = self.getReward(initH, newH)
-                key = tuple(self.state+[tile.identifier, move, rotate])
-                
-                
-                nextState = self.calculateState()
-                nextStateWithTile = nextState + [tile.identifier]
-                
-                if key not in self.exp:
-                    Q = alpha * reward
-                    #self.exp[key] = (reward, nextState, Q)
-                    print("new %f, %f, %f" % (Q, move, rotate))
-                elif key in self.exp:
-                    Q = self.exp[key][2]
-                    Q += alpha * (reward + gamma * self.getMaxQ(nextStateWithTile)[0] - Q)
-                    #self.exp[key] = (reward, nextState, Q)
-                    print("old %f, %f, %f" % (Q, move, rotate))
-
-                print(self.state)
-                print(nextState)
-                print(reward)
-                print(Q)
-                input()
-                # print(move, rotate, Q)
-                # input()
-                # print(Q)
-                # self.state = np.copy( self.grid.grid.transpose()[count:count+4] )
-                # print("%f, %f \n" % (move, rotate))
-                # print(self.state)
-                # input()
-                # =====================================================================
-
-                tile.psX, tile.psY, tile.rot = self.backupTile
-                self.grid.grid = np.copy( self.backupGrid )
-        # =====================================================================
-        # print(self.state.flatten().tolist())
-        # Q = self.getMaxQ(self.state.flatten().tolist(), alpha, reward)[0]
-        # print(Q)
-        # bestAction = self.getMaxQ(self.state.flatten().tolist(), alpha, reward)[1]
-        Q, bestAction = self.getMaxQ(curStateWithTile)
-        bestMove, bestRotate = bestAction[0], bestAction[1]
-        key = curStateWithTile + [bestMove, bestRotate]
-        self.exp[key] = ()
-        # print(bestAction)
-        # input()
-        # print(self.getMaxQ(self.state.flatten().tolist()))
-        # input()
-        
-        # print(bestAction)
-        # input()
-        self.update(tile, bestMove, bestRotate, gameover)
-        # =====================================================================
-
-        return bestMove, bestRotate, bestRating
-
-    def rateMove( self ):
-        gameover = False
-        cGenome = self.population.generations[ self.currentGeneration ].genomes[ self.currentGenome ]
-        rating = 0
-        rating += self.grid.lastRowsCleared * cGenome.weightRowsCleared
-        rating += self.grid.lastMaxHeight * cGenome.weightMaxHeight
-        rating += self.grid.lastSumHeight * cGenome.weightSumHeight
-        rating += self.grid.lastRelativeHeight * cGenome.weightRelativeHeight
-        rating += self.grid.lastAmountHoles * cGenome.weightAmountHoles
-        rating += self.grid.lastRoughness * cGenome.weightRoughness
-        if self.grid.checkForGameOver( ):
-            rating -= 500
-            gameover = True
-        return rating, gameover
-    """
     # =====================================================================
 
     def train(self, tile):
@@ -230,12 +77,13 @@ class AI( object ):
         self.grid.realAction = False
         self.backupTile = [ tile.psX, tile.psY, tile.rot ]
         self.state = self.calculateState()
+        fitness_old = self.fitness()
 
         old = False
         initH = self.grid.lastMaxHeight
         maxQ = float('-inf')
         for move in range( -5, 6 ):
-            for rotate in range( 0, 3 ):
+            for rotate in range( 0, 4 ):
                 for i in range( 0, rotate ):
                     tile.rotCW( )
                 if move<0:
@@ -250,7 +98,10 @@ class AI( object ):
                 self.grid.removeCompleteRows( )
 
                 newH = self.grid.lastMaxHeight
-                reward = self.getReward(initH, newH)
+                fitness_new = self.fitness()
+                # reward = self.getReward(initH, newH)
+                reward = self.getReward(fitness_old, fitness_new)
+                print(reward)
 
                 nextState = self.calculateState()
                 nextStateWithTile = nextState + [tile.identifier]
@@ -285,14 +136,24 @@ class AI( object ):
         #input()
         return bestMove, bestRotate
 
-    def getReward(self, h1, h2):
+    def fitness(self):
         #print('next H: %d, cur H: %d' % (h2, h1))
-        reward = (-100) * (h2-h1)
-        return reward
+        fitness = 0
+        fitness += self.grid.lastRowsCleared * 0.76
+        # reward += self.grid.lastMaxHeight * -1.510066
+        fitness += self.grid.lastSumHeight / 10 * -0.51
+        # reward += self.grid.lastRelativeHeight * -1.0
+        fitness += self.grid.lastAmountHoles * -0.36
+        fitness += self.grid.lastRoughness * -0.18
+        # reward = (-100) * (h2-h1)
+        return fitness
+
+    def getReward(self, fitness_old, fitness_new):
+        return fitness_new - fitness_old
 
     def calculateState(self):
         count = 0
-        test = [1,1,1,1,1,1,1,1,1,1]
+        test = [1,1,1,1,1,1]
         for i in self.backupGrid.transpose():
             if count > 15:
                 break
