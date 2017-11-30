@@ -4,6 +4,8 @@
 import numpy as np
 import gridController
 
+WIDTH = 6
+HEIGHT = 12
 
 class Tile( object ):
 
@@ -90,11 +92,11 @@ class MovableTile( Tile ):
         return True
 
     def render( self ):
-        grid = np.zeros( [ 6, 20 ], dtype=np.uint8 )
+        grid = np.zeros( [ WIDTH, HEIGHT ], dtype=np.uint8 ) #change width #change height
         rotated = np.rot90( self.layout, self.rot)
         for x in range(4):
             for y in range(4):
-                if -1 < x+self.psX < 6 and -1 < y+self.psY < 20:
+                if -1 < x+self.psX < WIDTH and -1 < y+self.psY < HEIGHT: #change width #change height
                     grid[ x+self.psX, y+self.psY ] = rotated[ x, y ] * self.identifier
         return grid
 
@@ -104,8 +106,8 @@ class MovableTile( Tile ):
 
     def apply( self ):
         rendered = self.render( )
-        for x in range( 6 ):
-            for y in range( 20 ):
+        for x in range( WIDTH ): #change width
+            for y in range( HEIGHT ): #change height
                 if rendered[ x, y ] != 0:
                     self.grid.apply( x, y, self.identifier )
         self.grid.removeCompleteRows( )
@@ -132,6 +134,6 @@ class TileController( object ):
     # =====================================================================    
     def getTile( self , index):
         index = ((index + 3) * 1234456) % 7 
-        pattern = self.tileSet[ 0 ]
+        pattern = self.tileSet[ 4 ]
         return MovableTile( pattern.layout, pattern.identifier, self.grid, 3 )
     # =====================================================================

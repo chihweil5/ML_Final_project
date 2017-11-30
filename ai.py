@@ -5,6 +5,8 @@ import population
 import numpy as np
 from random import choice
 
+WIDTH = 6
+HEIGHT = 12
 
 class AI( object ):
 
@@ -16,7 +18,7 @@ class AI( object ):
         self.currentGeneration = 0
         self.currentGenome = 0
         self.grapher = grapher
-        self.backupGrid = np.zeros( [ 6, 20 ], dtype=np.uint8 )
+        self.backupGrid = np.zeros( [ WIDTH, HEIGHT ], dtype=np.uint8 ) #change width #change height
         self.backupTile = [ 0, 0, 0 ]
         # ===================================================================== 
         # self.state = np.zeros( [ self.height, 10 ], dtype=np.uint8 )
@@ -101,7 +103,7 @@ class AI( object ):
                 fitness_new = self.fitness()
                 # reward = self.getReward(initH, newH)
                 reward = self.getReward(fitness_old, fitness_new)
-                print(reward)
+                # print(reward)
 
                 nextState = self.calculateState()
                 nextStateWithTile = nextState + [tile.identifier]
@@ -131,6 +133,8 @@ class AI( object ):
         if old:
             print("old %f, %f, %f, %f" % (maxQ, newQ, bestMove, bestMove))
             # input()
+        else:
+            print("====new==== %f, %f, %f, %f" % (maxQ, newQ, bestMove, bestMove))
         # print('bestAction: (%d, %d)' % (bestMove, bestRotate))
         # print('Max Q:', maxQ)
         #input()
@@ -153,7 +157,7 @@ class AI( object ):
 
     def calculateState(self):
         count = 0
-        test = [1,1,1,1,1,1]
+        test = [1,1,1,1,1,1] #change width
         for i in self.backupGrid.transpose():
             if count > 15:
                 break
@@ -167,10 +171,10 @@ class AI( object ):
             # print(item)
             # input()
             state_count = 0
-            while state_count < 20 and item[state_count] == 0:
+            while state_count < HEIGHT and item[state_count] == 0:
                 state_count += 1
                 pass
-            state += [20 - state_count]
+            state += [HEIGHT - state_count]
 
         state_diff=[]
         for i in range(len(state)-1):

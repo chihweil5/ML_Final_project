@@ -5,6 +5,9 @@ import pygame as gui
 import numpy as np
 import os
 
+WIDTH = 6
+HEIGHT = 12
+
 
 class ViewController( object ):
 
@@ -90,8 +93,8 @@ class ViewController( object ):
 
     def updateGrid( self ):
         grid = self.grid.grid  + self.cTile.render( )
-        for x in range( 6 ):
-            for y in range( 20 ):
+        for x in range( WIDTH ): #change width
+            for y in range( HEIGHT ): #change height
                 color = self.colors[ grid[ x, y ] ]
                 gui.draw.rect( self.screen, color, gui.Rect( 30*x+65, 30*y+65, 21, 21 ), 0 )
 
