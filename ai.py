@@ -17,6 +17,7 @@ class AI( object ):
         self.population = population.Population( )
         self.currentGeneration = 0
         self.currentGenome = 0
+        self.old = 0
         self.grapher = grapher
         self.backupGrid = np.zeros( [ WIDTH, HEIGHT ], dtype=np.uint8 ) #change width #change height
         self.backupTile = [ 0, 0, 0 ]
@@ -27,24 +28,32 @@ class AI( object ):
             self.exp = exp
         else:
             self.exp = {}    
-        self.gamma = 0.9
-        self.alpha = 0.02
+
+        self.storeExp = {}
+        self.count = 0
+        self.gamma = 0.8
+        self.alpha = 0.2
+        self.totalReward = 0
         # =====================================================================
 
     # =====================================================================
 
     def train(self, tile):
+        if self.count > 100:
+            self.count = 0
+            # self.exp = self.storeExp
         bestMove, bestRotate = self.chooseBestAction(tile)
         self.update(tile, bestMove, bestRotate)
+        self.count += 1
 
     def update(self, tile, bestMove, bestRotate):
         self.grid.realAction = True
         self.grid.grid = np.copy( self.backupGrid )
         initH = self.grid.lastMaxHeight
-        
+        value1 = self.fitness()
         self.state = self.calculateState()
-        curStateWithTile = self.state + [tile.identifier]
-        curStateKey = tuple(curStateWithTile + [bestMove, bestRotate])
+        curStateWithTile = tuple(self.state + [tile.identifier])
+        # curStateKey = tuple(curStateWithTile + [bestMove, bestRotate])
 
         for i in range( 0, bestRotate ):
             tile.rotCW( )
@@ -59,20 +68,28 @@ class AI( object ):
         self.grid.removeCompleteRows( )
 
         newH = self.grid.lastMaxHeight
+        value2 = self.fitness()
         nextState = self.calculateState()
-        nextStateWithTile = nextState + [tile.identifier]
-        nextStateKey = tuple(nextStateWithTile + [bestMove, bestRotate])
+        nextStateWithTile = tuple(nextState + [tile.identifier])
+        # nextStateKey = tuple(nextStateWithTile + [bestMove, bestRotate])
         # print(curStateKey)
         # print(nextStateKey)
         # input()
-        reward = self.getReward(initH, newH)
+        #reward = self.getReward(value1, value2)
+        reward = value2
+        self.totalReward += value2
         ####UPDATE Q!!!!
-        if curStateKey not in self.exp:
-            self.exp[curStateKey] = 0
+        if curStateWithTile not in self.exp:
+            self.exp[curStateWithTile] = 0
         
-        self.exp[curStateKey] = (1 - self.alpha) * self.exp[curStateKey] + self.alpha * (reward + self.gamma * self.exp[nextStateKey])
-        # print(curStateKey)
-        # print(self.exp[curStateKey])
+        self.exp[curStateWithTile] = (1 - self.alpha) * self.exp[curStateWithTile] + self.alpha * (reward + self.gamma * self.exp[nextStateWithTile])
+        # print(self.grid.grid.transpose())
+        # print(curStateWithTile)
+        # # print(self.exp[curStateKey])
+        # input()
+        self.grid.grid = np.copy( self.backupGrid )
+        tile.drop()
+
     
     def chooseBestAction(self, tile):
         self.backupGrid = np.copy( self.grid.grid )
@@ -83,9 +100,17 @@ class AI( object ):
 
         old = False
         initH = self.grid.lastMaxHeight
+        value1 = self.fitness()
         maxQ = float('-inf')
-        for move in range( -5, 6 ):
+        bestAction = []
+        for move in range( -int(WIDTH/2)-1, int(WIDTH/2)+1 ):
             for rotate in range( 0, 4 ):
+                lastRowsCleared = self.grid.lastRowsCleared 
+                lastMaxHeight = self.grid.lastMaxHeight
+                lastSumHeight = self.grid.lastSumHeight
+                lastRelativeHeight = self.grid.lastRelativeHeight
+                lastRoughness = self.grid.lastRoughness
+                lastAmountHoles = self.grid.lastAmountHoles
                 for i in range( 0, rotate ):
                     tile.rotCW( )
                 if move<0:
@@ -100,28 +125,27 @@ class AI( object ):
                 self.grid.removeCompleteRows( )
 
                 newH = self.grid.lastMaxHeight
-                fitness_new = self.fitness()
-                # reward = self.getReward(initH, newH)
-                reward = self.getReward(fitness_old, fitness_new)
-                # print(reward)
 
+                value2 = self.fitness()
+                #reward = self.getReward(value1, value2)
+                reward = value2
                 nextState = self.calculateState()
-                nextStateWithTile = nextState + [tile.identifier]
-                nextStateKey = tuple(nextStateWithTile + [move, rotate])
+                nextStateWithTile = tuple(nextState + [tile.identifier])
+                # nextStateKey = tuple(nextStateWithTile + [move, rotate])
                 
-                if nextStateKey not in self.exp:
+                if nextStateWithTile not in self.exp:
                     old = False
-                    self.exp[nextStateKey] = 0
-                elif self.exp[nextStateKey] != 0:                    
+                    self.exp[nextStateWithTile] = 0
+                elif self.exp[nextStateWithTile] != 0:                    
                     old = True
                     
-                Q = self.exp[nextStateKey]
-                if (reward + self.gamma * Q) >= maxQ:
-                    newQ = self.exp[nextStateKey]
+                Q = self.exp[nextStateWithTile]
+                if (reward + self.gamma * Q) > maxQ:
+                    newQ = self.exp[nextStateWithTile]
                     maxQ = reward + self.gamma * Q
-                    bestMove = move
-                    bestRotate = rotate
-
+                    bestAction = [[move, rotate]]
+                elif (reward + self.gamma * Q) == maxQ:
+                    bestAction.append([move, rotate])
                 # print('next H: %d, cur H: %d' % (newH, initH))
                 # print(self.state)
                 # print(nextState)
@@ -130,30 +154,69 @@ class AI( object ):
 
                 tile.psX, tile.psY, tile.rot = self.backupTile
                 self.grid.grid = np.copy( self.backupGrid )
-        if old:
-            print("old %f, %f, %f, %f" % (maxQ, newQ, bestMove, bestMove))
+                self.grid.lastRowsCleared = lastRowsCleared
+                self.grid.lastMaxHeight = lastMaxHeight
+                self.grid.lastSumHeight = lastSumHeight
+                self.grid.lastRelativeHeight = lastRelativeHeight
+                self.grid.lastRoughness = lastRoughness
+                self.grid.lastAmountHoles = lastAmountHoles
+        
             # input()
-        else:
-            print("====new==== %f, %f, %f, %f" % (maxQ, newQ, bestMove, bestMove))
+        
         # print('bestAction: (%d, %d)' % (bestMove, bestRotate))
         # print('Max Q:', maxQ)
-        #input()
-        return bestMove, bestRotate
+        # print("value2: ", value2)
+        # print("holes: ", self.grid.lastMaxHeight)
+        # input()
+        if len(bestAction) > 1:
+            oneBestAction = choice(bestAction)
+        else:
+            oneBestAction = bestAction[0]
+
+        if old:
+            # print("old %f, %f, %f, %f" % (maxQ, newQ, oneBestAction[0], oneBestAction[1]))
+            self.old += 1
+        # else:
+        #     print("====new==== %f, %f, %f, %f" % (maxQ, newQ, oneBestAction[0], oneBestAction[1]))
+        return oneBestAction[0], oneBestAction[1]
+
+    def getReward(self, value1, value2):
+        #print('next H: %d, cur H: %d' % (h2, h1))
+
+        # reward = 0
+        # reward += self.grid.lastRowsCleared * 4.760666
+        # reward += self.grid.lastMaxHeight * -1.510066
+        # reward += self.grid.lastSumHeight * 0.0
+        # reward += self.grid.lastRelativeHeight * -1.0
+        # reward += self.grid.lastAmountHoles * -0.35663
+        # reward += self.grid.lastAmountHoles * -5.35663
+        # reward += self.grid.lastRoughness * -0.184483
+        # # reward = (-100) * (h2-h1)
+        # return reward
+
+        #reward = (-100) * (h2-h1)
+        """
+        reward = self.grid.lastRowsCleared * 4.7
+        reward += self.grid.lastMaxHeight * -1.51
+        #reward += self.grid.lastSumHeight * 0.0
+        #reward += self.grid.lastRelativeHeight * -1.0
+        reward += self.grid.lastAmountHoles * -5.35
+        reward += self.grid.lastRoughness * -0.184483
+        """
+        return value2-value1
 
     def fitness(self):
-        #print('next H: %d, cur H: %d' % (h2, h1))
-        fitness = 0
-        fitness += self.grid.lastRowsCleared * 0.76
-        # reward += self.grid.lastMaxHeight * -1.510066
-        fitness += self.grid.lastSumHeight / 10 * -0.51
-        # reward += self.grid.lastRelativeHeight * -1.0
-        fitness += self.grid.lastAmountHoles * -0.36
-        fitness += self.grid.lastRoughness * -0.18
-        # reward = (-100) * (h2-h1)
-        return fitness
-
-    def getReward(self, fitness_old, fitness_new):
-        return fitness_new - fitness_old
+        # value = self.grid.lastRowsCleared * 0.76
+        # value += self.grid.lastSumHeight / 10 * -0.51
+        # value += self.grid.lastAmountHoles * -0.36
+        # value += self.grid.lastRoughness * -0.18
+        value = 10
+        value += self.grid.lastRowsCleared * 0.76
+        value += self.grid.lastMaxHeight * -0.51
+        #value += self.grid.lastRelativeHeight * -0.5
+        value += self.grid.lastAmountHoles * -0.36
+        value += self.grid.lastRoughness * -0.18
+        return value
 
     def calculateState(self):
         count = 0

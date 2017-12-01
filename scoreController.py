@@ -6,7 +6,8 @@ class ScoreController( object ):
     def __init__( self ):
         self.score = 0
         self.highest = 0
-        self.clearPoints = [ 0, 40, 100, 300, 1200 ]
+        # self.clearPoints = [ 0, 40, 100, 300, 1200 ]
+        self.clearPoints = [ 0, 100, 210, 320, 430 ]
 
     def rowsCleared( self, rows ):
         self.score += self.clearPoints[ rows ]

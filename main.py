@@ -9,9 +9,10 @@ import tileController
 import grapher
 
 import ai
-
+import time
 import viewController
 
+timeStart = time.time()
 
 timeController = timeController.TimeController( 1 )
 scoreController = scoreController.ScoreController( )
@@ -37,7 +38,7 @@ nTile = tileController.getTile( index )
 # nTile = tileController.getRandomTile( )
 viewController.setTile( cTile, nTile )
 
-
+"""
 while not viewController.abort:
     if timeController.timeEvent( ):
         if viewController.aiState:
@@ -59,3 +60,40 @@ while not viewController.abort:
                 nTile = tileController.getTile( index )
                 viewController.setTile( cTile, nTile )
     viewController.updateEverything( )
+"""
+
+for j in range(10):
+    times = 0
+    index = 0
+    ai.totalReward = 0
+    ai.old = 0
+    scoreController.reset()
+    gridController.reset()
+    # input()
+    for i in range(300):
+        if timeController.timeEvent( ):
+            if viewController.aiState:
+                #move, rotate, rating =  ai.makeMove( cTile )
+                ai.train(cTile)
+            if not cTile.incY( ):
+                cTile.apply( )
+
+                if not gridController.checkForGameOver( ):
+                    scoreController.tileReleased( )
+                    cTile = nTile
+                    index += 1
+                    nTile = tileController.getTile( index )
+                    viewController.setTile( cTile, nTile )
+                else:
+                    index = 0
+                    times += 1
+                    cTile = tileController.getTile( index )
+                    index += 1
+                    nTile = tileController.getTile( index )
+                    viewController.setTile( cTile, nTile )
+        viewController.updateEverything( )
+    time_cost = time.time()
+    print('Evaluation : %f, gameover %d times, use %d old exp, cost %f sec' % (scoreController.score, times, ai.old, time_cost-timeStart))
+
+timeEnd = time.time()
+print("It cost %f sec" % (timeEnd - timeStart))
