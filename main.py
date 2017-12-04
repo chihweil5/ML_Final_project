@@ -94,6 +94,6 @@ for j in range(10):
         viewController.updateEverything( )
     time_cost = time.time()
     print('Evaluation : %f, gameover %d times, use %d old exp, cost %f sec' % (scoreController.score, times, ai.old, time_cost-timeStart))
-
+    ai.printQTable()
 timeEnd = time.time()
 print("It cost %f sec" % (timeEnd - timeStart))

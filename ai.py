@@ -238,7 +238,7 @@ class AI( object ):
                 state_count += 1
                 pass
             state += [HEIGHT - state_count]
-
+        
         state_diff=[]
         for i in range(len(state)-1):
             # state_diff.append(state[i+1] - state[i])
@@ -250,6 +250,11 @@ class AI( object ):
                 state_diff.append(0)
 
         return state_diff
+
+    def printQTable(self):
+        for state, Q in self.exp.items():
+            print("---------------------------------")
+            print("{} ==> {}".format(state, Q))
 
     """
     def getMaxQ( self , nextState, reward):
