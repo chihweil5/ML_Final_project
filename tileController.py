@@ -139,7 +139,7 @@ class TileController( object ):
         if index > 3:
             index = 4
         else:
-            index = 2
+            index = 1
         
 
         pattern = self.tileSet[ index ]
