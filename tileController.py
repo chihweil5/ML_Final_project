@@ -125,6 +125,13 @@ class TileController( object ):
             Tile( [ [0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0] ], 5 ),
             Tile( [ [1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0] ], 6 ),
             Tile( [ [0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0] ], 7 )
+            # Tile( [ [1,0,0,0],[1,1,0,0],[0,0,0,0],[0,0,0,0] ], 1 ),
+            # Tile( [ [0,1,0,0],[1,0,0,0],[0,0,0,0],[0,0,0,0] ], 2 ),
+            # Tile( [ [1,1,0,0],[1,1,0,0],[0,0,0,0],[0,0,0,0] ], 3 ),
+            # Tile( [ [1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0] ], 4 ),
+            # Tile( [ [1,0,0,0],[1,0,0,0],[0,0,0,0],[0,0,0,0] ], 5 ),
+            # Tile( [ [1,0,0,0],[1,0,0,0],[0,0,0,0],[0,0,0,0] ], 6 ),
+            # Tile( [ [1,0,0,0],[1,0,0,0],[0,0,0,0],[0,0,0,0] ], 7 )
         ]
         self.grid = grid
 
@@ -136,10 +143,10 @@ class TileController( object ):
     def getTile( self , index):
         index = ((index + 3) * 1234451) % 7
 
-        if index > 3:
-            index = 4
-        else:
-            index = 1
+        # if index > 3:
+        #     index = 4
+        # else:
+        #     index = 1
 
         pattern = self.tileSet[ index ]
         return MovableTile( pattern.layout, pattern.identifier, self.grid, 3 )

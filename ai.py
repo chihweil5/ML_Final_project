@@ -82,7 +82,7 @@ class AI( object ):
         if curStateWithTile not in self.exp:
             self.exp[curStateWithTile] = 0
         
-        self.exp[curStateWithTile] = (1 - self.alpha) * self.exp[curStateWithTile] + self.alpha * (reward + self.gamma * self.exp[nextStateWithTile])
+        # self.exp[curStateWithTile] = (1 - self.alpha) * self.exp[curStateWithTile] + self.alpha * (reward + self.gamma * self.exp[nextStateWithTile])
         # print(self.grid.grid.transpose())
         # print(curStateWithTile)
         # # print(self.exp[curStateKey])
@@ -211,11 +211,11 @@ class AI( object ):
         # value += self.grid.lastAmountHoles * -0.36
         # value += self.grid.lastRoughness * -0.18
         value = 10
-        value += self.grid.lastRowsCleared * 0.76
-        value += self.grid.lastMaxHeight * -0.51
+        value += self.grid.lastRowsCleared * 1
+        value += self.grid.lastMaxHeight * -1
         #value += self.grid.lastRelativeHeight * -0.5
-        value += self.grid.lastAmountHoles * -0.36
-        value += self.grid.lastRoughness * -0.18
+        value += self.grid.lastAmountHoles * -1
+        value += self.grid.lastRoughness * -1
         return value
 
     def calculateState(self):
