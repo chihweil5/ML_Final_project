@@ -75,8 +75,8 @@ class AI( object ):
         # print(curStateKey)
         # print(nextStateKey)
         # input()
-        #reward = self.getReward(value1, value2)
-        reward = value2
+        reward = self.getReward(value1, value2)
+        #reward = value2
         self.totalReward += value2
         ####UPDATE Q!!!!
         if curStateWithTile not in self.exp:
@@ -103,7 +103,7 @@ class AI( object ):
         value1 = self.fitness()
         maxQ = float('-inf')
         bestAction = []
-        for move in range( -int(WIDTH/2)-1, int(WIDTH/2)+1 ):
+        for move in range( -int(WIDTH/2), int(WIDTH/2) ):
             for rotate in range( 0, 4 ):
                 lastRowsCleared = self.grid.lastRowsCleared 
                 lastMaxHeight = self.grid.lastMaxHeight
@@ -127,8 +127,8 @@ class AI( object ):
                 newH = self.grid.lastMaxHeight
 
                 value2 = self.fitness()
-                #reward = self.getReward(value1, value2)
-                reward = value2
+                reward = self.getReward(value1, value2)
+                
                 nextState = self.calculateState()
                 nextStateWithTile = tuple(nextState + [tile.identifier])
                 # nextStateKey = tuple(nextStateWithTile + [move, rotate])
