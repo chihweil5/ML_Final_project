@@ -11,6 +11,8 @@ import grapher
 import ai
 import time
 import viewController
+import NeuralNetwork
+import ai_nn
 
 timeStart = time.time()
 
@@ -21,7 +23,11 @@ tileController = tileController.TileController( gridController )
 
 grapher = grapher.Grapher( scoreController )
 
-ai = ai.AI( gridController, scoreController, grapher, {}, 20)
+#ai = ai.AI( gridController, scoreController, grapher, {}, 20)
+
+nn = NeuralNetwork.NeuralNetwork()
+model = nn.create_model()
+ai = ai_nn.AI_NN(gridController, scoreController, grapher, model)
 
 viewController = viewController.ViewController( gridController, timeController, scoreController, ai, grapher )
 
@@ -65,8 +71,6 @@ while not viewController.abort:
 while True:
     times = 0
     index = 0
-    ai.totalReward = 0
-    ai.old = 0
     scoreController.reset()
     gridController.reset()
     # input()
@@ -74,7 +78,7 @@ while True:
         if timeController.timeEvent( ):
             if viewController.aiState:
                 #move, rotate, rating =  ai.makeMove( cTile )
-                ai.train(cTile)
+                ai.play(cTile)
             if not cTile.incY( ):
                 cTile.apply( )
 
