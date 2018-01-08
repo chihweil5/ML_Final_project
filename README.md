@@ -5,3 +5,9 @@ CSCI 5622 Machine Learning
 Using Reinforcement learning to build Tetris AI 
 
 The project is build on bbergrobots/TetrisAI https://github.com/bbergrobots/TetrisAI
+
+Please clone branch `6-col` to see the final result of the project.
+
+`git pull origin 6-col`
+
+`python3 main.py`
