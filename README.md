@@ -12,4 +12,4 @@ Please clone branch `6-col` to see the final result of the project.
 
 `python3 main.py`
 
-# Click [HERE](https://drive.google.com/file/d/1l-EV022Ho3bcThQRBZHFPNuQIU8a-u8Q/view?usp=sharing) for details
+#### Click [HERE](https://drive.google.com/file/d/1l-EV022Ho3bcThQRBZHFPNuQIU8a-u8Q/view?usp=sharing) for details
